@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Sepet — ElementWars{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/inner.css">{% endblock %}
+{% block content %}
+<div style="padding-top:var(--header-h)">
+  <div class="inner-wrap">
+    <h1 class="page-h1">Sepet</h1>
+    <div class="cart-layout">
+      <div>
+        <div id="cart-items"><div class="text-muted fs-13">Yükleniyor...</div></div>
+      </div>
+      <div>
+        <div class="card" style="padding:24px">
+          <div class="fw-700 fs-16 mb-16">Kupon</div>
+          <div class="flex gap-8 mb-24">
+            <input class="input" type="text" id="coupon-input" placeholder="Kupon kodu gir" style="flex:1">
+            <button class="btn btn-outline" onclick="toast('Kupon sistemi yakında!','info')">Uygula</button>
+          </div>
+          <div class="divider"></div>
+          <div class="fw-700 fs-16 mb-16">Sipariş Özeti</div>
+          <div class="flex-between mb-8"><span class="text-muted fs-13">Toplam</span><span class="fw-700" id="cart-total">0.00 USD</span></div>
+          <div class="divider"></div>
+          <div class="field mb-8"><label>Ödeme Yöntemi</label><select class="input" id="payment-method"><option value="credit">Kredi Kullan</option><option value="manual">Manuel Ödeme</option></select></div>
+          <label class="flex-center gap-8 mb-8 fs-13 text-muted" style="cursor:pointer">
+            <input type="checkbox" id="use-credit" checked style="accent-color:var(--accent)">
+            Kredinizi kullan
+          </label>
+          <label class="flex-center gap-8 mb-16 fs-13 text-muted" style="cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--accent)">
+            Kullanım şartlarını kabul ediyorum
+          </label>
+          <button class="btn btn-primary w-full" style="padding:14px;font-size:15px;justify-content:center" onclick="doCheckout()">
+            <i class="fas fa-lock"></i> Ödemeyi Tamamla
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadCart() {
+  const el = document.getElementById('cart-items');
+  const totalEl = document.getElementById('cart-total');
+  try {
+    const data = await api.get('/api/cart');
+    if (!data.items || !data.items.length) {
+      el.innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle alert-icon"></i><div class="alert-content"><h4>Sepetiniz Boş</h4><p>Mağazayı ziyaret ederek ürün ekleyebilirsiniz.</p></div></div>';
+      return;
+    }
+    el.innerHTML = `<div class="card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>Ürün</th><th>Fiyat</th><th>Adet</th><th>Toplam</th><th></th></tr></thead>
+        <tbody>${data.items.map(i=>`
+          <tr>
+            <td><span class="fw-700">${i.image_emoji} ${i.name}</span></td>
+            <td>${fmt(i.price)} USD</td>
+            <td>${i.quantity}</td>
+            <td class="fw-700 text-accent">${fmt(i.price*i.quantity)} USD</td>
+            <td><button class="btn btn-red btn-xs" onclick="removeItem(${i.id})"><i class="fas fa-trash"></i></button></td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+    totalEl.textContent = fmt(data.total) + ' USD';
+  } catch { el.innerHTML = '<div class="text-muted">Yüklenemedi.</div>'; }
+}
+async function removeItem(id) {
+  await api.delete('/api/cart/remove/'+id);
+  loadCart(); refreshCartCount();
+}
+async function doCheckout() {
+  const use_credit = document.getElementById('use-credit').checked;
+  const res = await api.post('/api/cart/checkout', {use_credit});
+  if (res.success) { toast('Ödeme başarılı! Sipariş #'+res.order_id,'success'); loadCart(); refreshCartCount(); }
+  else toast(res.error,'error');
+}
+loadCart();
+</script>
+{% endblock %}
