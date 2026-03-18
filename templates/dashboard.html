@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Yönetim Paneli — ElementWars{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/dashboard.css">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout">
+
+  <!-- Icon Sidebar -->
+  <aside class="dash-sidebar" id="dash-sidebar">
+    <div class="dash-brand">EW</div>
+    <nav class="dash-icons">
+      <div class="dash-icon active" data-section="overview" onclick="switchSection('overview')" title="Genel Bakış"><i class="fas fa-home"></i></div>
+      <div class="dash-icon" data-section="users" onclick="switchSection('users')" title="Kullanıcılar"><i class="fas fa-users"></i></div>
+      <div class="dash-icon" data-section="store" onclick="switchSection('store')" title="Mağaza"><i class="fas fa-store"></i></div>
+      <div class="dash-icon" data-section="support" onclick="switchSection('support')" title="Destek"><i class="fas fa-headset"></i></div>
+    </nav>
+    <div class="dash-icon-bottom">
+      <div class="dash-icon" onclick="goto('/')" title="Siteye Dön"><i class="fas fa-external-link-alt"></i></div>
+      <div class="dash-icon" onclick="logout()" title="Çıkış"><i class="fas fa-sign-out-alt"></i></div>
+    </div>
+  </aside>
+
+  <!-- Sub-navigation -->
+  <aside class="dash-subnav" id="dash-subnav">
+    <!-- injected by JS -->
+  </aside>
+
+  <!-- Main content -->
+  <div class="dash-main">
+    <!-- Topbar -->
+    <div class="inner-topbar">
+      <div class="breadcrumb" id="dash-breadcrumb">
+        <span><i class="fas fa-home"></i></span>
+        <span class="sep">›</span>
+        <span class="current">Genel Bakış</span>
+      </div>
+      <div class="inner-topbar-right">
+        <i class="fas fa-search topbar-icon"></i>
+        <i class="fas fa-bell topbar-icon"></i>
+        <span class="text-muted fs-13" id="dash-username">...</span>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="dash-body" id="dash-body">
+      <div class="text-muted fs-13" style="padding:40px">Yükleniyor...</div>
+    </div>
+
+    <div class="admin-footer">
+      <div class="footer-lang"><span>🇹🇷</span> Türkçe</div>
+      <div class="footer-brand">
+        <span class="text-accent fw-800">ElementWars</span>
+        <span class="text-dim">v1.0.0</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}
