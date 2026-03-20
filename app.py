@@ -24,6 +24,9 @@ except ImportError:
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "elementwars-dev-secret")
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 DATABASE_URL  = os.environ.get("DATABASE_URL", "")
 SQLITE_PATH   = os.path.join(os.path.dirname(__file__), "elementwars.db")
 
