@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Mağaza — ElementWars{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/store.css">{% endblock %}
+{% block content %}
+<div class="store-hero">
+  <div class="store-hero-inner">
+    <div class="store-hero-tag">MAĞAZA</div>
+    <h1 class="store-hero-title">ElementWars<br>Mağazası</h1>
+    <p class="store-hero-sub">Oyun deneyimini bir üst seviyeye taşı. VIP paketleri, özel itemlar ve çok daha fazlası seni bekliyor.</p>
+  </div>
+  <div class="store-hero-deco">⚔️</div>
+</div>
+
+<div class="store-wrap" id="store-wrap">
+  <!-- Categories or Products injected by JS -->
+  <div class="text-muted fs-13" style="padding:40px;text-align:center">Yükleniyor...</div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/store.js"></script>{% endblock %}
