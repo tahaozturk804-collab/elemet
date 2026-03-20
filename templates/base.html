@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ElementWars{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="{% block extra_css %}/static/css/main.css{% endblock %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="ew-loading">
+  <div class="loading-logo">EW</div>
+  <div class="loading-text">ElementWars Yükleniyor</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+
+<!-- Toast notifications -->
+<div id="toast-container"></div>
+
+{% block navbar %}
+<!-- ── TOP NAVIGATION ── -->
+<nav class="topnav" id="topnav">
+  <div class="nav-brand" onclick="goto('/')">
+    <span class="nav-brand-text">ElementWars</span>
+  </div>
+
+  <div class="nav-links">
+    <a class="nav-link" data-path="/"      onclick="goto('/')">Anasayfa</a>
+    <a class="nav-link" data-path="/store" onclick="goto('/store')">Mağaza</a>
+    <a class="nav-link" data-path="/support" onclick="goto('/support')">Destek</a>
+    <a class="nav-link" data-path="/apply" onclick="goto('/apply')">Başvuru</a>
+  </div>
+
+  <div class="nav-right">
+    <!-- Logged out -->
+    <div id="nav-login-btn" class="nav-btn-login" onclick="goto('/login')" style="display:none">
+      Giriş Yap <i class="fas fa-arrow-right"></i>
+    </div>
+
+    <!-- Logged in -->
+    <div id="nav-user-block" style="display:none; align-items:center; gap:10px;">
+      <div class="nav-cart-btn" onclick="goto('/cart')">
+        <i class="fas fa-shopping-basket"></i>
+        <span class="nav-cart-badge">0</span>
+      </div>
+      <div class="nav-user-btn" onclick="toggleUserMenu()">
+        <img src="" class="nav-avatar" alt="avatar">
+        <span class="nav-username"></span>
+        <i class="fas fa-chevron-down nav-caret"></i>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- User dropdown -->
+<div class="user-dropdown" id="user-dropdown"></div>
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+<script src="/static/js/app.js"></script>
+<script>
+  (async () => {
+    await loadAuth();
+    await refreshCartCount();
+    setActiveNavLink();
+    hideLoader();
+  })();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

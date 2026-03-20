@@ -1,0 +1,456 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Mağaza{% endblock %}
+{% block icon_store %}active{% endblock %}
+{% block subnav_title %}Mağaza{% endblock %}
+
+{% block breadcrumb %}
+  <span class="sep">›</span><span class="current" id="bc-current">Ürünler</span>
+{% endblock %}
+
+{% block subnav %}
+  <div class="dash-subnav-title">Mağaza</div>
+  <div class="dash-subnav-item active" id="nav-products" onclick="showPage('products')"><i class="fas fa-box"></i> Ürünler</div>
+  <div class="dash-subnav-item" id="nav-categories" onclick="showPage('categories')"><i class="fas fa-th-large"></i> Kategoriler</div>
+  <div class="dash-subnav-item" id="nav-servers" onclick="showPage('servers')"><i class="fas fa-server"></i> Sunucular</div>
+  <div class="dash-subnav-item" id="nav-coupons" onclick="showPage('coupons')"><i class="fas fa-ticket-alt"></i> Kuponlar</div>
+  <div class="dash-subnav-item" id="nav-orders" onclick="showPage('orders')"><i class="fas fa-shopping-bag"></i> Siparişler</div>
+  <div class="dash-subnav-item" id="nav-payments" onclick="showPage('payments')"><i class="fas fa-credit-card"></i> Ödemeler</div>
+  <div class="dash-subnav-sep"></div>
+  <div class="dash-subnav-title">Gelişmiş</div>
+  <div class="dash-subnav-item" id="nav-bulk" onclick="showPage('bulk')"><i class="fas fa-tags"></i> Toplu İndirim</div>
+{% endblock %}
+
+{% block dash_content %}
+<!-- PRODUCTS -->
+<div id="view-products">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Ürünler</h1>
+    <div class="flex gap-8">
+      <div class="view-tabs">
+        <div class="view-tab active" id="tab-list" onclick="switchView('list')">Varsayılan Listeleme</div>
+        <div class="view-tab" id="tab-table" onclick="switchView('table')">Tablo Listeleme</div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="showPage('create-product')"><i class="fas fa-plus"></i> Yeni Ekle</button>
+    </div>
+  </div>
+  <div id="products-list">
+    <div class="text-muted fs-13">Yükleniyor...</div>
+  </div>
+</div>
+
+<!-- CREATE PRODUCT -->
+<div id="view-create-product" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Ürün Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('products')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div class="form-card">
+    <div class="form-card-title">Ürün Detayları</div>
+    <div style="display:grid;grid-template-columns:1fr 200px;gap:24px">
+      <div>
+        <div class="field"><label>Ad</label><input class="input" id="cp-name" placeholder="Ürün adı"></div>
+        <div class="field"><label>Kategori</label><select class="input" id="cp-cat"><option value="">Kategori seç</option></select></div>
+        <div class="field"><label>Açıklama</label><textarea class="input" id="cp-desc" rows="3" placeholder="Ürün açıklaması..."></textarea></div>
+      </div>
+      <div>
+        <div class="field"><label>Emoji / İkon</label>
+          <input class="input" id="cp-emoji" value="📦" style="text-align:center;font-size:28px;height:56px">
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Fiyat (USD)</label><input class="input" id="cp-price" type="number" step="0.01" value="9.99"></div>
+      <div class="field"><label>Stok (boş = sınırsız)</label><input class="input" id="cp-stock" type="number" placeholder="Sınırsız"></div>
+    </div>
+    <div class="field"><label>Öncelik</label><input class="input" id="cp-prio" type="number" value="0"></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-primary" onclick="createProduct()"><i class="fas fa-plus"></i> Oluştur</button>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div id="view-categories" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Mağaza Kategorileri</h1>
+    <button class="btn btn-primary btn-sm" onclick="showPage('create-category')"><i class="fas fa-plus"></i> Yeni Ekle</button>
+  </div>
+  <div class="search-wrap"><label>Kategoriler için arama yap</label><div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="cat-search" type="text" placeholder="Kategori ara..."></div></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table">
+      <thead><tr><th>Ad/ID</th><th>Ana Kategori</th><th>Öncelik</th><th></th></tr></thead>
+      <tbody id="cats-tbody"><tr><td colspan="4" class="text-muted" style="padding:20px;text-align:center">Yükleniyor...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CREATE CATEGORY -->
+<div id="view-create-category" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Kategori Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('categories')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div class="form-card">
+    <div style="display:grid;grid-template-columns:1fr 200px;gap:24px">
+      <div>
+        <div class="field"><label>Ad</label><input class="input" id="cc-name" placeholder="Kategori adı"></div>
+        <div class="field"><label>Ana Kategori</label><select class="input" id="cc-parent"><option value="">Ana kategori yok</option></select></div>
+        <div class="field"><label>Öncelik</label><input class="input" id="cc-prio" type="number" value="0"></div>
+      </div>
+      <div>
+        <div class="field"><label>Emoji</label>
+          <input class="input" id="cc-emoji" value="📦" style="text-align:center;font-size:28px;height:56px">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-primary" onclick="createCategory()"><i class="fas fa-plus"></i> Oluştur</button>
+  </div>
+</div>
+
+<!-- SERVERS -->
+<div id="view-servers" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Sunucular</h1>
+    <button class="btn btn-primary btn-sm" onclick="showPage('create-server')"><i class="fas fa-plus"></i> Yeni Ekle</button>
+  </div>
+  <div class="empty-state"><div class="empty-icon">🖥️</div><h3>Sunucu bulunamadı!</h3>
+    <div class="empty-actions"><button class="btn btn-primary" onclick="showPage('create-server')"><i class="fas fa-plus"></i> Sunucu Ekle</button></div>
+  </div>
+</div>
+
+<!-- CREATE SERVER -->
+<div id="view-create-server" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Sunucu Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('servers')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div class="form-card">
+    <div class="field"><label>Ad</label><input class="input" id="srv-name" placeholder="Sunucu adı"></div>
+    <div class="field"><label>Sunucu IP</label><input class="input" id="srv-ip" placeholder="play.example.net"></div>
+    <div class="field"><label>Sunucu Portu</label><input class="input" id="srv-port" type="number" placeholder="25565"></div>
+    <div class="field"><label>Konsol Türü</label><select class="input"><option>LeaderOS Connect</option><option>RCON</option><option>SSH</option></select></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-primary" onclick="toast('Sunucu oluşturuldu!','success');showPage('servers')"><i class="fas fa-plus"></i> Oluştur</button>
+  </div>
+</div>
+
+<!-- COUPONS -->
+<div id="view-coupons" style="display:none">
+  <div class="dash-ph"><h1 class="dash-page-title" style="margin-bottom:0">Kuponlar</h1></div>
+  <div class="empty-state"><div class="empty-icon" style="font-size:56px;opacity:0.4">😶</div><h3>Kupon bulunamadı!</h3>
+    <p>Yeni kuponlar eklemek için butona tıklayabilirsiniz.</p>
+    <div class="empty-actions"><button class="btn btn-primary" onclick="toast('Yakında!','info')"><i class="fas fa-plus"></i> Kupon Oluştur</button></div>
+  </div>
+</div>
+
+<!-- ORDERS -->
+<div id="view-orders" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Siparişler</h1>
+    <div class="flex gap-8">
+      <select class="input" style="width:180px;height:38px;padding:0 12px"><option>Hepsini Göster</option><option>Başarılı</option><option>Bekliyor</option></select>
+      <button class="btn btn-primary btn-sm" onclick="showPage('create-order')"><i class="fas fa-plus"></i> Yeni Ekle</button>
+    </div>
+  </div>
+  <div class="search-wrap"><label>Siparişler için arama yap</label><div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="ord-search" type="text" placeholder="Kullanıcı ara..."></div></div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Kullanıcı</th><th>Toplam</th><th>Yöntem</th><th>Durum</th><th>Tarih</th><th></th></tr></thead>
+      <tbody id="ord-tbody"><tr><td colspan="7" class="text-muted" style="padding:20px;text-align:center">Yükleniyor...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="pagination"><div class="page-btn">← Önceki</div><div class="page-btn active">1</div><div class="page-btn">Sonraki →</div></div>
+</div>
+
+<!-- CREATE ORDER -->
+<div id="view-create-order" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Sipariş Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('orders')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start">
+    <div class="form-card">
+      <div class="form-card-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>Ürünler</span>
+        <button class="btn btn-primary btn-sm" onclick="addOrderRow()"><i class="fas fa-plus"></i> Ekle</button>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>Ürün</th><th>Miktar</th><th>Birim Fiyat</th><th>Toplam</th><th></th></tr></thead>
+        <tbody id="order-items-body"></tbody>
+      </table>
+    </div>
+    <div class="form-card">
+      <div class="fw-800 fs-24 text-blue mb-16" id="order-grand-total" style="font-family:'Rajdhani',sans-serif">0.00 USD</div>
+      <div class="field"><label>Kullanıcı</label><input class="input" id="order-user" placeholder="Kullanıcı adı..."></div>
+      <div class="field"><label>Durum</label><select class="input"><option>Başarılı</option><option>Bekliyor</option></select></div>
+      <button class="btn btn-primary w-full" style="justify-content:center;padding:14px;margin-top:8px" onclick="toast('Sipariş oluşturuldu!','success');showPage('orders')">
+        <i class="fas fa-plus"></i> Oluştur
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENTS -->
+<div id="view-payments" style="display:none">
+  <div class="dash-ph"><h1 class="dash-page-title" style="margin-bottom:0">Ödemeler</h1></div>
+  <div class="search-wrap" style="display:grid;grid-template-columns:1fr 180px;gap:16px">
+    <div><label>Ödemeler için arama yap</label><div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="pay-search" type="text" placeholder="Ara..."></div></div>
+    <div><label>Durum</label><select class="input" style="height:46px"><option>Hepsini Göster</option></select></div>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Kullanıcı</th><th>Toplam</th><th>Yöntem</th><th>Durum</th><th>Tarih</th><th></th></tr></thead>
+      <tbody id="pay-tbody"><tr><td colspan="7" class="text-muted" style="padding:20px;text-align:center">Yükleniyor...</td></tr></tbody>
+    </table>
+  </div>
+  <div class="pagination"><div class="page-btn">← Önceki</div><div class="page-btn active">1</div><div class="page-btn">Sonraki →</div></div>
+</div>
+
+<!-- BULK DISCOUNT -->
+<div id="view-bulk" style="display:none">
+  <div class="dash-ph"><h1 class="dash-page-title" style="margin-bottom:0">Toplu İndirim</h1></div>
+  <div class="form-card">
+    <div class="toggle-wrap mb-24"><div class="toggle on" onclick="this.classList.toggle('on')"></div><span class="toggle-label">İndirim Durumu</span></div>
+    <div class="field"><label>İndirim (%):</label><input class="input" type="number" min="1" max="100" placeholder="ör. 20"></div>
+    <div class="field"><label>Son Kullanma Tarihi</label>
+      <div style="display:flex;gap:12px;align-items:center">
+        <input class="input" type="date" style="flex:1" disabled>
+        <label class="flex-center gap-8 fs-13" style="cursor:pointer;white-space:nowrap">
+          <input type="checkbox" checked onchange="this.closest('div').querySelector('input[type=date]').disabled=this.checked" style="accent-color:var(--blue)"> Asla
+        </label>
+      </div>
+    </div>
+    <div class="field"><label>Ürünler</label><select class="input"><option>Tüm Ürünler</option></select></div>
+    <button class="btn btn-primary" onclick="toast('Kaydedildi!','success')"><i class="fas fa-save"></i> Değişiklikleri Kaydet</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allProds = [];
+
+const pageNames = {
+  'products':'Ürünler','create-product':'Ürün Oluştur','categories':'Kategoriler',
+  'create-category':'Kategori Oluştur','servers':'Sunucular','create-server':'Sunucu Oluştur',
+  'coupons':'Kuponlar','orders':'Siparişler','create-order':'Sipariş Oluştur',
+  'payments':'Ödemeler','bulk':'Toplu İndirim'
+};
+
+function showPage(name) {
+  // hide all
+  document.querySelectorAll('[id^="view-"]').forEach(el => el.style.display='none');
+  const el = document.getElementById('view-'+name);
+  if(el) el.style.display='block';
+  // breadcrumb
+  const bc = document.getElementById('bc-current');
+  if(bc) bc.textContent = pageNames[name]||name;
+  // subnav active
+  document.querySelectorAll('.dash-subnav-item').forEach(i=>i.classList.remove('active'));
+  const nav = document.getElementById('nav-'+name.split('-')[0]);
+  if(nav) nav.classList.add('active');
+  // load data
+  if(name==='orders') loadOrders();
+  if(name==='payments') loadPayments();
+  if(name==='categories' || name==='create-category') loadCategories();
+  if(name==='create-product') loadCatsForSelect();
+  if(name==='create-order') initCreateOrder();
+}
+
+function switchView(mode) {
+  document.getElementById('tab-list').classList.toggle('active', mode==='list');
+  document.getElementById('tab-table').classList.toggle('active', mode==='table');
+  loadProducts(mode);
+}
+
+async function loadProducts(mode='list') {
+  const el = document.getElementById('products-list');
+  el.innerHTML = '<div class="text-muted fs-13">Yükleniyor...</div>';
+  const [cats, prods] = await Promise.all([api.get('/api/admin/categories'), api.get('/api/store/products')]);
+  allProds = prods;
+
+  if(mode==='table') {
+    el.innerHTML = `
+      <div class="search-wrap"><label>Ürünler için arama yap</label><div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="prod-search" type="text" placeholder="Ürün adı ara..."></div></div>
+      <div class="card" style="padding:0;overflow:hidden"><table class="data-table">
+        <thead><tr><th>Ad/ID</th><th>Kategori</th><th>Fiyat</th><th>Stok</th><th>Öncelik</th><th></th></tr></thead>
+        <tbody id="prods-tbody">
+          ${prods.map(p=>`<tr>
+            <td><div class="fw-700">${p.image_emoji} ${p.name}</div><div class="text-dim fs-11">#${p.id}</div></td>
+            <td class="text-muted">${p.category_name||'—'}</td>
+            <td class="fw-700 text-blue">${fmt(p.price)} USD</td>
+            <td class="text-muted fs-13">${p.stock?p.stock+' stokta':'Sınırsız'}</td>
+            <td class="text-muted">${p.priority}</td>
+            <td style="display:flex;gap:4px">
+              <button class="btn btn-ghost btn-icon btn-sm"><i class="fas fa-copy"></i></button>
+              <button class="btn btn-red btn-icon btn-sm" onclick="deleteProduct(${p.id},'${p.name}')"><i class="fas fa-trash"></i></button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+    filterTable('prod-search','prods-tbody');
+    return;
+  }
+
+  // List (grouped)
+  const grouped = {};
+  cats.forEach(c => { grouped[c.id]={cat:c,products:[]}; });
+  prods.forEach(p => { if(grouped[p.category_id]) grouped[p.category_id].products.push(p); });
+  el.innerHTML = Object.values(grouped).map(g=>`
+    <div class="prod-group">
+      <div class="prod-group-header"><span class="prod-group-name">${g.cat.emoji} ${g.cat.name}</span><span class="prod-group-count">${g.products.length} ürün</span></div>
+      ${g.products.map(p=>`<div class="prod-item">
+        <span class="prod-item-emoji">${p.image_emoji}</span>
+        <span class="prod-item-name">${p.name} <span class="text-dim fs-11">#${p.id}</span></span>
+        <span class="prod-item-price">${fmt(p.price)} USD</span>
+        <span class="prod-item-stock">${p.stock?p.stock+' stokta':'Sınırsız stokta'}</span>
+        <button class="btn btn-ghost btn-icon btn-sm"><i class="fas fa-copy"></i></button>
+        <button class="btn btn-red btn-icon btn-sm" onclick="deleteProduct(${p.id},'${p.name}')"><i class="fas fa-trash"></i></button>
+      </div>`).join('')}
+    </div>`).join('') || '<div class="empty-state"><div class="empty-icon">📦</div><h3>Ürün bulunamadı</h3></div>';
+}
+
+async function deleteProduct(id,name) {
+  if(!confirm(`"${name}" silinsin mi?`)) return;
+  const res = await api.delete('/api/admin/products/'+id);
+  if(res.success){toast('Silindi','success');loadProducts();}else toast(res.error,'error');
+}
+
+async function loadCatsForSelect() {
+  const cats = await api.get('/api/admin/categories');
+  const sel = document.getElementById('cp-cat');
+  if(sel) sel.innerHTML = '<option value="">Kategori seç</option>' + cats.map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+}
+
+async function createProduct() {
+  const name=document.getElementById('cp-name').value.trim();
+  const cid=document.getElementById('cp-cat').value;
+  const emoji=document.getElementById('cp-emoji').value;
+  const desc=document.getElementById('cp-desc').value;
+  const price=parseFloat(document.getElementById('cp-price').value);
+  const sv=document.getElementById('cp-stock').value; const stock=sv?parseInt(sv):null;
+  const priority=parseInt(document.getElementById('cp-prio').value)||0;
+  if(!name||!cid){toast('Ad ve kategori zorunlu','error');return;}
+  const res=await api.post('/api/admin/products',{name,category_id:cid,emoji,description:desc,price,stock,priority});
+  if(res.success){toast('Ürün oluşturuldu!','success');showPage('products');}else toast(res.error,'error');
+}
+
+async function loadCategories() {
+  const cats = await api.get('/api/admin/categories');
+  // table
+  const tbody = document.getElementById('cats-tbody');
+  if(tbody) {
+    tbody.innerHTML = cats.map(c=>`<tr>
+      <td><div class="fw-700">${c.emoji} ${c.name}</div><div class="text-dim fs-11">#${c.id}</div></td>
+      <td class="text-muted">—</td>
+      <td class="text-muted">${c.priority}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-blue btn-icon btn-sm"><i class="fas fa-eye"></i></button>
+        <button class="btn btn-red btn-icon btn-sm" onclick="deleteCategory(${c.id},'${c.name}')"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+    filterTable('cat-search','cats-tbody');
+  }
+  // parent select
+  const sel = document.getElementById('cc-parent');
+  if(sel) sel.innerHTML = '<option value="">Ana kategori yok</option>' + cats.map(c=>`<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+}
+
+async function deleteCategory(id,name) {
+  if(!confirm(`"${name}" silinsin mi?`)) return;
+  const res = await api.delete('/api/admin/categories/'+id);
+  if(res.success){toast('Silindi','success');loadCategories();}else toast(res.error,'error');
+}
+
+async function createCategory() {
+  const name=document.getElementById('cc-name').value.trim();
+  const emoji=document.getElementById('cc-emoji').value;
+  const priority=parseInt(document.getElementById('cc-prio').value)||0;
+  if(!name){toast('Ad gerekli','error');return;}
+  const res=await api.post('/api/admin/categories',{name,emoji,priority});
+  if(res.success){toast('Kategori oluşturuldu!','success');showPage('categories');}else toast(res.error,'error');
+}
+
+async function loadOrders() {
+  const orders = await api.get('/api/admin/orders');
+  const tbody = document.getElementById('ord-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = orders.length===0
+    ? '<tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Sipariş yok</td></tr>'
+    : orders.map(o=>`<tr>
+        <td class="text-muted">#${o.id}</td>
+        <td><div class="fw-700">${o.username}</div></td>
+        <td class="fw-700 text-blue">${fmt(o.total)} USD</td>
+        <td class="text-muted fs-13">${o.payment_method}</td>
+        <td><span class="badge badge-green">${o.status}</span></td>
+        <td class="text-muted fs-13">${timeAgo(o.created_at)}</td>
+        <td><button class="btn btn-blue btn-icon btn-sm"><i class="fas fa-eye"></i></button></td>
+      </tr>`).join('');
+  filterTable('ord-search','ord-tbody');
+}
+
+async function loadPayments() {
+  const orders = await api.get('/api/admin/orders');
+  const payments = orders.filter(o=>o.payment_method!=='Kredi');
+  const tbody = document.getElementById('pay-tbody');
+  if(!tbody) return;
+  tbody.innerHTML = payments.length===0
+    ? '<tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Ödeme yok</td></tr>'
+    : payments.map(o=>`<tr>
+        <td class="text-muted">#${o.id}</td>
+        <td><div class="fw-700">${o.username}</div></td>
+        <td class="fw-700 text-blue">${fmt(o.total)} USD</td>
+        <td class="text-muted fs-13">${o.payment_method}</td>
+        <td><span class="badge badge-green">${o.status}</span></td>
+        <td class="text-muted fs-13">${timeAgo(o.created_at)}</td>
+        <td style="display:flex;gap:4px">
+          <button class="btn btn-blue btn-icon btn-sm"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-red btn-icon btn-sm"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('');
+  filterTable('pay-search','pay-tbody');
+}
+
+async function initCreateOrder() {
+  const prods = await api.get('/api/store/products');
+  allProds = prods;
+  const tbody = document.getElementById('order-items-body');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  addOrderRow();
+}
+
+function addOrderRow() {
+  const tbody = document.getElementById('order-items-body');
+  if(!tbody) return;
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><select class="input" style="margin:0;min-width:140px" onchange="updateTotal()">
+      <option value="">Ürün seç</option>
+      ${allProds.map(p=>`<option value="${p.price}">${p.image_emoji} ${p.name}</option>`).join('')}
+    </select></td>
+    <td><input class="input" type="number" value="1" min="1" style="margin:0;width:65px" oninput="updateTotal()"></td>
+    <td class="text-muted">0.00</td>
+    <td class="fw-700 text-blue">0.00 USD</td>
+    <td><button class="btn btn-red btn-icon btn-sm" onclick="this.closest('tr').remove();updateTotal()"><i class="fas fa-trash"></i></button></td>`;
+  tbody.appendChild(row);
+}
+
+function updateTotal() {
+  let total=0;
+  document.querySelectorAll('#order-items-body tr').forEach(row=>{
+    const sel=row.querySelector('select'), qty=row.querySelector('input[type=number]');
+    if(!sel||!qty) return;
+    total += (parseFloat(sel.value)||0)*(parseInt(qty.value)||1);
+  });
+  const el=document.getElementById('order-grand-total');
+  if(el) el.textContent=total.toFixed(2)+' USD';
+}
+
+// Init
+loadProducts();
+</script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Destek — ElementWars{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/inner.css">{% endblock %}
+{% block content %}
+<div style="padding-top:var(--header-h)">
+  <div class="inner-wrap">
+    <div class="flex-between mb-24">
+      <h1 class="page-h1" style="margin-bottom:0">Destek Talepleri</h1>
+      <button class="btn btn-primary" onclick="openModal('new-ticket-modal')"><i class="fas fa-plus"></i> Yeni Talep</button>
+    </div>
+    <div class="alert alert-warning mb-24">
+      <i class="fas fa-exclamation-triangle alert-icon"></i>
+      <div class="alert-content">
+        <h4>Talep oluşturmadan önce!</h4>
+        <p>Sık yaşanan sorunları yardım merkezinde bulabilirsiniz. Talep açmadan önce kontrol edin.</p>
+      </div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>#ID</th><th>Başlık</th><th>Kategori</th><th>Tarih</th><th>Durum</th><th></th></tr></thead>
+        <tbody id="tickets-body"><tr><td colspan="6" class="text-muted" style="padding:24px;text-align:center">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<!-- New ticket modal -->
+<div class="modal-overlay" id="new-ticket-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Yeni Destek Talebi</div>
+      <div class="modal-close" onclick="closeModal('new-ticket-modal')"><i class="fas fa-times"></i></div>
+    </div>
+    <div class="field"><label>Başlık</label><input class="input" type="text" id="ticket-title" placeholder="Sorunuzu kısaca açıklayın"></div>
+    <div class="field"><label>Kategori</label><select class="input" id="ticket-cat"><option>Game</option><option>Store</option><option>Account</option><option>Other</option></select></div>
+    <div class="field"><label>Mesaj</label><textarea class="input" id="ticket-msg" rows="4" placeholder="Detaylı açıklama..."></textarea></div>
+    <button class="btn btn-primary w-full" onclick="createTicket()" style="justify-content:center;padding:12px">Gönder</button>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+async function loadTickets() {
+  const tbody = document.getElementById('tickets-body');
+  const me = await api.get('/api/auth/me');
+  if (!me.logged_in) {
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center"><button class="btn btn-primary" onclick="goto(\'/login\')">Giriş Yapın</button></td></tr>';
+    return;
+  }
+  const tickets = await api.get('/api/support/tickets');
+  if (!tickets.length) {
+    tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🎫</div><h3>Henüz talep yok</h3></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = tickets.map(t=>`
+    <tr>
+      <td class="text-muted">#${t.id}</td>
+      <td class="fw-700">${t.title}</td>
+      <td>${t.category}</td>
+      <td class="text-muted fs-13">${timeAgo(t.created_at)}</td>
+      <td><span class="badge ${t.status==='Açık'?'badge-blue':'badge-green'}">${t.status}</span></td>
+      <td><button class="btn btn-red btn-icon btn-sm" onclick="delTicket(${t.id})"><i class="fas fa-trash"></i></button></td>
+    </tr>`).join('');
+}
+async function createTicket() {
+  const title = document.getElementById('ticket-title').value.trim();
+  const category = document.getElementById('ticket-cat').value;
+  const message = document.getElementById('ticket-msg').value.trim();
+  const res = await api.post('/api/support/tickets', {title,category,message});
+  if (res.success) { toast('Talep oluşturuldu!','success'); closeModal('new-ticket-modal'); loadTickets(); }
+  else toast(res.error,'error');
+}
+async function delTicket(id) {
+  if (!confirm('Talep silinsin mi?')) return;
+  const res = await api.delete('/api/support/tickets/'+id);
+  if (res.success) { toast('Talep silindi','success'); loadTickets(); }
+}
+loadTickets();
+</script>
+{% endblock %}

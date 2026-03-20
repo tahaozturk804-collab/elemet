@@ -1,0 +1,108 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Destek{% endblock %}
+{% block icon_support %}active{% endblock %}
+{% block subnav_title %}Destek{% endblock %}
+
+{% block breadcrumb %}
+  <span class="sep">›</span><span class="current">Destek Talepleri</span>
+{% endblock %}
+
+{% block subnav %}
+  <div class="dash-subnav-title">Destek</div>
+  <a class="dash-subnav-item active" href="/dashboard/support"><i class="fas fa-ticket-alt"></i> Talepler</a>
+  <div class="dash-subnav-item"><i class="fas fa-th-large"></i> Kategoriler</div>
+  <div class="dash-subnav-item"><i class="fas fa-bolt"></i> Hızlı Cevaplar</div>
+  <div class="dash-subnav-item"><i class="fas fa-cog"></i> Ayarlar</div>
+  <div class="dash-subnav-sep"></div>
+  <div class="dash-subnav-title">Yardım Merkezi</div>
+  <div class="dash-subnav-item"><i class="fas fa-file-alt"></i> Makaleler</div>
+  <div class="dash-subnav-item"><i class="fas fa-th-large"></i> Konular</div>
+{% endblock %}
+
+{% block dash_content %}
+<div class="dash-ph">
+  <h1 class="dash-page-title" style="margin-bottom:0">Destek Talepleri</h1>
+</div>
+
+<div class="search-wrap" style="display:grid;grid-template-columns:1fr 160px 160px 160px;gap:16px;align-items:end">
+  <div>
+    <label>Destek Talepleri için arama yap</label>
+    <div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="tkt-search" type="text" placeholder="Başlık, kullanıcı ara..."></div>
+  </div>
+  <div><label>Kategori</label><select class="input" style="height:46px"><option>Hepsini Göster</option></select></div>
+  <div><label>Durum</label><select class="input" style="height:46px" id="status-filter" onchange="filterTickets()"><option value="">Hepsini Göster</option><option value="Açık">Açık</option><option value="Kapalı">Kapalı</option></select></div>
+  <div><label>Sil</label><select class="input" style="height:46px"><option>Hiçbiri Seçilmedi</option></select></div>
+</div>
+
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="tkt-all" onchange="document.querySelectorAll('.tkt-cb').forEach(c=>c.checked=this.checked)"></th>
+        <th>Başlık/ID</th>
+        <th>Kullanıcı</th>
+        <th>Kategori</th>
+        <th>Durum</th>
+        <th>Tarih</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tkt-tbody">
+      <tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Yükleniyor...</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="pagination"><div class="page-btn">← Önceki</div><div class="page-btn active">1</div><div class="page-btn">Sonraki →</div></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allTickets = [];
+
+async function loadTickets() {
+  allTickets = await api.get('/api/admin/tickets');
+  renderTickets(allTickets);
+  filterTable('tkt-search','tkt-tbody');
+}
+
+function renderTickets(tickets) {
+  const tbody = document.getElementById('tkt-tbody');
+  tbody.innerHTML = tickets.length===0
+    ? '<tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Talep bulunamadı</td></tr>'
+    : tickets.map(t=>`<tr>
+        <td><input type="checkbox" class="tkt-cb"></td>
+        <td><div class="fw-700">${t.title}</div><div class="text-dim fs-11">#${t.id}</div></td>
+        <td><div class="fw-700">${t.username}</div><div class="text-dim fs-11">@${t.username}</div></td>
+        <td class="text-muted">${t.category}</td>
+        <td><span class="badge ${t.status==='Açık'?'badge-blue':'badge-green'}">${t.status}</span></td>
+        <td class="text-muted fs-13">${timeAgo(t.created_at)}</td>
+        <td style="display:flex;gap:4px">
+          <button class="btn btn-blue btn-icon btn-sm"><i class="fas fa-eye"></i></button>
+          ${t.status==='Açık'?`<button class="btn btn-ghost btn-icon btn-sm" title="Kapat" onclick="closeTicket(${t.id})"><i class="fas fa-times"></i></button>`:''}
+          <button class="btn btn-red btn-icon btn-sm" onclick="deleteTicket(${t.id})"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('');
+}
+
+function filterTickets() {
+  const status = document.getElementById('status-filter').value;
+  const filtered = status ? allTickets.filter(t=>t.status===status) : allTickets;
+  renderTickets(filtered);
+}
+
+async function closeTicket(id) {
+  const res = await api.put('/api/admin/tickets/'+id+'/close',{});
+  if(res.success){toast('Talep kapatıldı','success');loadTickets();}
+  else toast(res.error||'Hata','error');
+}
+
+async function deleteTicket(id) {
+  if(!confirm('Talep silinsin mi?')) return;
+  const res = await api.delete('/api/support/tickets/'+id);
+  if(res.success){toast('Talep silindi','success');loadTickets();}
+  else toast(res.error||'Hata','error');
+}
+
+loadTickets();
+</script>
+{% endblock %}

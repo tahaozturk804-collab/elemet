@@ -1,0 +1,149 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Başvurular{% endblock %}
+{% block icon_apps %}active{% endblock %}
+{% block subnav_title %}Başvurular{% endblock %}
+
+{% block breadcrumb %}
+  <span class="sep">›</span><span class="current" id="bc-current">Başvuru Formları</span>
+{% endblock %}
+
+{% block subnav %}
+  <div class="dash-subnav-title">Başvurular</div>
+  <div class="dash-subnav-item active" id="nav-forms" onclick="showPage('forms')"><i class="fas fa-file-alt"></i> Başvuru Formları</div>
+  <div class="dash-subnav-item" id="nav-list" onclick="showPage('list')"><i class="fas fa-download"></i> Başvurular</div>
+  <div class="dash-subnav-sep"></div>
+  <div class="dash-subnav-title">Özel Formlar</div>
+  <div class="dash-subnav-item" id="nav-custom" onclick="showPage('custom')"><i class="fas fa-file-code"></i> Özel Formlar</div>
+  <div class="dash-subnav-item" id="nav-answers" onclick="showPage('answers')"><i class="fas fa-inbox"></i> Yanıtlar</div>
+{% endblock %}
+
+{% block dash_content %}
+<!-- BAŞVURU FORMLARI -->
+<div id="view-forms">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Başvuru Formları</h1>
+    <button class="btn btn-primary btn-sm" onclick="showPage('create-form')"><i class="fas fa-plus"></i> Yeni Form</button>
+  </div>
+  <div class="empty-state">
+    <div class="empty-icon" style="font-size:64px;opacity:0.4">😶</div>
+    <h3>Başvuru formu bulunamadı!</h3>
+    <p>Yeni bir başvuru formu oluşturmak için butona tıklayabilirsiniz.</p>
+    <div class="empty-actions">
+      <button class="btn btn-ghost" onclick="location.href='/dashboard'">Ana Sayfaya Dön</button>
+      <button class="btn btn-primary" onclick="showPage('create-form')"><i class="fas fa-plus"></i> Başvuru Formu Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- BAŞVURULAR -->
+<div id="view-list" style="display:none">
+  <div class="dash-ph"><h1 class="dash-page-title" style="margin-bottom:0">Başvurular</h1></div>
+  <div class="empty-state">
+    <div class="empty-icon" style="font-size:64px;opacity:0.4">😶</div>
+    <h3>Hiç başvuru bulunamadı!</h3>
+    <p>Burada gösterilecek başvuru yok.</p>
+    <div class="empty-actions"><button class="btn btn-ghost" onclick="location.href='/dashboard'">Ana Sayfaya Dön</button></div>
+  </div>
+</div>
+
+<!-- ÖZEL FORMLAR -->
+<div id="view-custom" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Özel Formlar</h1>
+    <button class="btn btn-primary btn-sm" onclick="showPage('create-custom')"><i class="fas fa-plus"></i> Yeni Form</button>
+  </div>
+  <div class="empty-state">
+    <div class="empty-icon" style="font-size:64px;opacity:0.4">😶</div>
+    <h3>Hiç özel form bulunamadı!</h3>
+    <div class="empty-actions">
+      <button class="btn btn-ghost" onclick="location.href='/dashboard'">Ana Sayfaya Dön</button>
+      <button class="btn btn-primary" onclick="showPage('create-custom')"><i class="fas fa-plus"></i> Özel Form Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- YANITLAR -->
+<div id="view-answers" style="display:none">
+  <div class="dash-ph"><h1 class="dash-page-title" style="margin-bottom:0">Cevaplar</h1></div>
+  <div class="empty-state">
+    <div class="empty-icon" style="font-size:64px;opacity:0.4">😶</div>
+    <h3>Hiç cevap bulunamadı!</h3>
+    <div class="empty-actions"><button class="btn btn-ghost" onclick="location.href='/dashboard'">Ana Sayfaya Dön</button></div>
+  </div>
+</div>
+
+<!-- BAŞVURU FORMU OLUŞTUR -->
+<div id="view-create-form" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Başvuru Formu Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('forms')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div class="form-card">
+    <div class="form-card-title"><i class="fas fa-file-alt text-blue" style="margin-right:8px"></i>Form Bilgileri</div>
+    <div class="field"><label>Form Başlığı</label><input class="input" id="af-title" placeholder="ör. Moderatör Başvurusu"></div>
+    <div class="field"><label>Açıklama</label><textarea class="input" id="af-desc" rows="3" placeholder="Başvuru hakkında açıklama..."></textarea></div>
+    <div class="form-row">
+      <div class="field"><label>Durum</label><select class="input"><option>Aktif</option><option>Pasif</option></select></div>
+      <div class="field"><label>Kategori</label><input class="input" placeholder="ör. Moderatör, Yönetim"></div>
+    </div>
+  </div>
+  <div class="form-card">
+    <div class="form-card-title"><i class="fas fa-list text-blue" style="margin-right:8px"></i>Form Alanları</div>
+    <div id="af-fields">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;margin-bottom:12px">
+        <input class="input" placeholder="Alan adı (ör. Yaş)" style="margin:0">
+        <select class="input" style="margin:0"><option>Metin</option><option>Uzun Metin</option><option>Seçim</option><option>Sayı</option></select>
+        <button class="btn btn-red btn-icon" style="height:46px"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>
+    <button class="btn btn-ghost btn-sm mt-8" onclick="addField()"><i class="fas fa-plus"></i> Alan Ekle</button>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-primary" onclick="toast('Form oluşturuldu!','success');showPage('forms')"><i class="fas fa-save"></i> Formu Kaydet</button>
+  </div>
+</div>
+
+<!-- ÖZEL FORM OLUŞTUR -->
+<div id="view-create-custom" style="display:none">
+  <div class="dash-ph">
+    <h1 class="dash-page-title" style="margin-bottom:0">Özel Form Oluştur</h1>
+    <button class="btn btn-ghost btn-sm" onclick="showPage('custom')"><i class="fas fa-arrow-left"></i> Geri</button>
+  </div>
+  <div class="form-card">
+    <div class="field"><label>Form Başlığı</label><input class="input" placeholder="Form başlığı"></div>
+    <div class="field"><label>Açıklama</label><textarea class="input" rows="2" placeholder="Form açıklaması..."></textarea></div>
+  </div>
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-primary" onclick="toast('Form oluşturuldu!','success');showPage('custom')"><i class="fas fa-save"></i> Formu Kaydet</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const pageNames = {
+  'forms':'Başvuru Formları','list':'Başvurular',
+  'custom':'Özel Formlar','answers':'Cevaplar',
+  'create-form':'Form Oluştur','create-custom':'Özel Form Oluştur'
+};
+
+function showPage(name) {
+  document.querySelectorAll('[id^="view-"]').forEach(el=>el.style.display='none');
+  const el = document.getElementById('view-'+name);
+  if(el) el.style.display='block';
+  const bc = document.getElementById('bc-current');
+  if(bc) bc.textContent = pageNames[name]||name;
+  document.querySelectorAll('.dash-subnav-item').forEach(i=>i.classList.remove('active'));
+  const nav = document.getElementById('nav-'+name.split('-')[0]);
+  if(nav) nav.classList.add('active');
+}
+
+function addField() {
+  const c = document.getElementById('af-fields');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:grid;grid-template-columns:1fr 1fr auto;gap:12px;margin-bottom:12px';
+  row.innerHTML = `<input class="input" placeholder="Alan adı" style="margin:0"><select class="input" style="margin:0"><option>Metin</option><option>Uzun Metin</option><option>Seçim</option><option>Sayı</option></select><button class="btn btn-red btn-icon" style="height:46px" onclick="this.parentElement.remove()"><i class="fas fa-trash"></i></button>`;
+  c.appendChild(row);
+}
+</script>
+{% endblock %}

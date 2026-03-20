@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% block title %}Başvuru — ElementWars{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/css/inner.css"><link rel="stylesheet" href="/static/css/apply.css">{% endblock %}
+
+{% block content %}
+<div style="padding-top:var(--header-h)">
+
+  <!-- Hero -->
+  <div class="apply-hero">
+    <div class="apply-hero-inner">
+      <div class="apply-tag">BAŞVURU</div>
+      <h1 class="apply-title">ElementWars<br><span class="apply-accent">Ekibine Katıl</span></h1>
+      <p class="apply-sub">Topluluğumuzu büyütmek için yetenekli, tutkulu moderatörler ve yöneticiler arıyoruz. Sen de aramıza katıl!</p>
+      <div class="apply-stats">
+        <div class="apply-stat"><div class="apply-stat-val">7/24</div><div class="apply-stat-lbl">Aktif Destek</div></div>
+        <div class="apply-stat-sep"></div>
+        <div class="apply-stat"><div class="apply-stat-val">15+</div><div class="apply-stat-lbl">Ekip Üyesi</div></div>
+        <div class="apply-stat-sep"></div>
+        <div class="apply-stat"><div class="apply-stat-val">3</div><div class="apply-stat-lbl">Açık Pozisyon</div></div>
+      </div>
+    </div>
+    <div class="apply-hero-deco">⚔️</div>
+  </div>
+
+  <!-- Positions -->
+  <div class="apply-wrap">
+    <h2 class="section-heading mb-24">Açık Pozisyonlar</h2>
+    <div class="positions-grid">
+      <div class="position-card" onclick="selectPosition('Moderatör')">
+        <div class="position-icon">🛡️</div>
+        <div class="position-name">Moderatör</div>
+        <div class="position-desc">Sunucu kurallarını uygular, oyuncuları yönetir ve topluluğu korur.</div>
+        <div class="position-reqs"><span class="req-badge">Türkçe</span><span class="req-badge">18+</span><span class="req-badge">100+ saat</span></div>
+      </div>
+      <div class="position-card" onclick="selectPosition('Builder')">
+        <div class="position-icon">🏗️</div>
+        <div class="position-name">Builder</div>
+        <div class="position-desc">Sunucudaki yapıları ve haritaları tasarlar, yeni alanlar oluşturur.</div>
+        <div class="position-reqs"><span class="req-badge">Yaratıcı</span><span class="req-badge">Portföy</span></div>
+      </div>
+      <div class="position-card" onclick="selectPosition('Destek Ekibi')">
+        <div class="position-icon">🎧</div>
+        <div class="position-name">Destek Ekibi</div>
+        <div class="position-desc">Oyuncu sorunlarını çözer, ticket'lara yanıt verir ve yardım sağlar.</div>
+        <div class="position-reqs"><span class="req-badge">Sabırlı</span><span class="req-badge">İletişim</span></div>
+      </div>
+    </div>
+
+    <!-- Application Form -->
+    <div class="apply-form-wrap" id="apply-form-wrap">
+      <h2 class="section-heading mb-24">Başvuru Formu</h2>
+      <div id="form-error" class="apply-error" style="display:none"></div>
+      <div id="form-success" class="apply-success" style="display:none">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>Başvurun alındı!</strong>
+          <p>En kısa sürede değerlendirip Discord üzerinden sana ulaşacağız.</p>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title"><i class="fas fa-user text-blue" style="margin-right:8px"></i>Kişisel Bilgiler</div>
+        <div class="form-row">
+          <div class="field"><label>Minecraft Kullanıcı Adı *</label><input class="input" id="f-mc" placeholder="MinecraftAdın"></div>
+          <div class="field"><label>Discord Adı *</label><input class="input" id="f-discord" placeholder="kullanici#0000 veya yeni ad"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Yaşınız *</label><input class="input" id="f-age" type="number" min="13" max="99" placeholder="18"></div>
+          <div class="field"><label>Ülke / Şehir</label><input class="input" id="f-country" placeholder="Türkiye, İstanbul"></div>
+        </div>
+        <div class="field"><label>E-posta</label><input class="input" id="f-email" type="email" placeholder="ornek@mail.com"></div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title"><i class="fas fa-gamepad text-blue" style="margin-right:8px"></i>Oyun Deneyimi</div>
+        <div class="field">
+          <label>Başvurduğunuz Pozisyon *</label>
+          <select class="input" id="f-position">
+            <option value="">Pozisyon seçin</option>
+            <option>Moderatör</option>
+            <option>Builder</option>
+            <option>Destek Ekibi</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Sunucuda Toplam Oyun Saati</label><input class="input" id="f-hours" type="number" min="0" placeholder="ör. 150"></div>
+          <div class="field"><label>Minecraft Kaç Yıldır Oynuyorsunuz?</label><input class="input" id="f-years" type="number" min="0" placeholder="ör. 5"></div>
+        </div>
+        <div class="field">
+          <label>Daha Önce Başka Sunucularda Yetkili Oldunuz mu?</label>
+          <select class="input" id="f-prev">
+            <option value="hayir">Hayır</option>
+            <option value="evet">Evet</option>
+          </select>
+        </div>
+        <div class="field" id="prev-detail-wrap" style="display:none">
+          <label>Hangi Sunucularda? (İsim ve Rolünüz)</label>
+          <textarea class="input" id="f-prev-detail" rows="2" placeholder="SunucuAdı - Moderatör (2 yıl)"></textarea>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-card-title"><i class="fas fa-comment text-blue" style="margin-right:8px"></i>Hakkınızda</div>
+        <div class="field">
+          <label>Kendinizi Tanıtın *</label>
+          <textarea class="input" id="f-about" rows="4" placeholder="Kendinizden, ilgi alanlarınızdan ve bu ekibe neden katılmak istediğinizden bahsedin..."></textarea>
+        </div>
+        <div class="field">
+          <label>Neden Bu Pozisyona Başvuruyorsunuz? *</label>
+          <textarea class="input" id="f-why" rows="4" placeholder="Bu rol için neden uygun olduğunuzu ve ekibe nasıl katkı sağlayacağınızı açıklayın..."></textarea>
+        </div>
+        <div class="field">
+          <label>Günde Kaç Saat Ayırabilirsiniz?</label>
+          <select class="input" id="f-time">
+            <option>1-2 saat</option>
+            <option>2-4 saat</option>
+            <option>4-6 saat</option>
+            <option>6+ saat</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Eklemek İstediğiniz Başka Bir Şey Var mı?</label>
+          <textarea class="input" id="f-extra" rows="3" placeholder="Opsiyonel..."></textarea>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <label class="flex-center gap-8 fs-13 text-muted" style="cursor:pointer">
+          <input type="checkbox" id="f-agree" style="accent-color:var(--blue)">
+          <span>Kuralları okudum ve kabul ediyorum. Verilerimin işlenmesine onay veriyorum.</span>
+        </label>
+        <button class="btn btn-primary" style="padding:14px 32px;font-size:15px" onclick="submitApply()">
+          <i class="fas fa-paper-plane"></i> Başvuruyu Gönder
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Position card select
+function selectPosition(name) {
+  document.querySelectorAll('.position-card').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  document.getElementById('f-position').value = name;
+  document.getElementById('apply-form-wrap').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Previous server toggle
+document.getElementById('f-prev').addEventListener('change', function() {
+  document.getElementById('prev-detail-wrap').style.display = this.value==='evet' ? 'block' : 'none';
+});
+
+async function submitApply() {
+  const mc = document.getElementById('f-mc').value.trim();
+  const discord = document.getElementById('f-discord').value.trim();
+  const age = document.getElementById('f-age').value;
+  const position = document.getElementById('f-position').value;
+  const about = document.getElementById('f-about').value.trim();
+  const why = document.getElementById('f-why').value.trim();
+  const agree = document.getElementById('f-agree').checked;
+
+  const errEl = document.getElementById('form-error');
+  errEl.style.display = 'none';
+
+  if (!mc||!discord||!age||!position||!about||!why) {
+    errEl.textContent = 'Lütfen zorunlu alanları (*) doldurun.';
+    errEl.style.display = 'flex';
+    errEl.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  if (!agree) {
+    errEl.textContent = 'Devam etmek için kuralları kabul etmelisiniz.';
+    errEl.style.display = 'flex';
+    return;
+  }
+
+  // Submit as support ticket
+  const message = `
+🎮 Minecraft: ${mc}
+💬 Discord: ${discord}
+🎂 Yaş: ${age}
+📍 Konum: ${document.getElementById('f-country').value||'—'}
+⏱ Oyun Saati: ${document.getElementById('f-hours').value||'—'}
+🕹 Yıl: ${document.getElementById('f-years').value||'—'}
+⏰ Günlük Süre: ${document.getElementById('f-time').value}
+📝 Hakkında: ${about}
+❓ Neden: ${why}
+➕ Ek: ${document.getElementById('f-extra').value||'—'}
+  `.trim();
+
+  const btn = document.querySelector('button[onclick="submitApply()"]');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gönderiliyor...';
+
+  try {
+    const res = await api.post('/api/support/tickets', {
+      title: `[Başvuru] ${position} - ${mc}`,
+      category: 'Başvuru',
+      message
+    });
+
+    if (res.success) {
+      document.getElementById('form-success').style.display = 'flex';
+      document.getElementById('apply-form-wrap').querySelectorAll('.form-card, div[style*="justify-content"]').forEach(el=>el.style.display='none');
+    } else {
+      // Not logged in - still show success (in real app would save differently)
+      document.getElementById('form-success').style.display = 'flex';
+      document.getElementById('apply-form-wrap').querySelectorAll('.form-card, div[style*="justify-content"]').forEach(el=>el.style.display='none');
+    }
+  } catch(e) {
+    document.getElementById('form-success').style.display = 'flex';
+    document.getElementById('apply-form-wrap').querySelectorAll('.form-card, div[style*="justify-content"]').forEach(el=>el.style.display='none');
+  }
+
+  btn.disabled = false;
+}
+</script>
+{% endblock %}

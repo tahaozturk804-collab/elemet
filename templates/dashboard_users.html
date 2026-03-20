@@ -1,0 +1,215 @@
+{% extends "dashboard_base.html" %}
+{% block title %}Kullanıcılar{% endblock %}
+{% block icon_users %}active{% endblock %}
+{% block subnav_title %}Kullanıcı Yönetimi{% endblock %}
+
+{% block breadcrumb %}
+  <span class="sep">›</span><span class="current">Kullanıcılar</span>
+{% endblock %}
+
+{% block subnav %}
+  <div class="dash-subnav-title">Kullanıcı Yönetimi</div>
+  <a class="dash-subnav-item active" href="/dashboard/users"><i class="fas fa-users"></i> Kullanıcılar</a>
+  <div class="dash-subnav-item" onclick="showPage('roles')"><i class="fas fa-shield-alt"></i> Roller</div>
+  <div class="dash-subnav-item" onclick="showPage('staff')"><i class="fas fa-user-tie"></i> Yetkililer</div>
+  <div class="dash-subnav-item" onclick="showPage('banned')"><i class="fas fa-ban"></i> Engellenen Kullanıcılar</div>
+  <div class="dash-subnav-sep"></div>
+  <div class="dash-subnav-title">İşlemler</div>
+  <div class="dash-subnav-item" onclick="showPage('credit')"><i class="fas fa-paper-plane"></i> Kredi Gönder</div>
+{% endblock %}
+
+{% block dash_content %}
+<div id="page-users">
+  <!-- USERS LIST -->
+  <div id="view-users">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Kullanıcılar</h1>
+      <button class="btn btn-primary btn-sm" onclick="showCreate()"><i class="fas fa-plus"></i> Yeni Ekle</button>
+    </div>
+    <div class="search-wrap">
+      <label>Kullanıcılar için arama yap</label>
+      <div class="search-input-wrap"><i class="fas fa-search"></i><input class="input search-input" id="user-search" type="text" placeholder="Ad, e-posta ara..."></div>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Kullanıcı</th><th>E-posta</th><th>Rol</th><th>Kredi</th><th>Tarih</th><th></th></tr></thead>
+        <tbody id="users-tbody"><tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="pagination"><div class="page-btn">← Önceki</div><div class="page-btn active">1</div><div class="page-btn">Sonraki →</div></div>
+  </div>
+
+  <!-- CREATE USER -->
+  <div id="view-create" style="display:none">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Hesap Oluştur</h1>
+      <div class="flex gap-8">
+        <button class="btn btn-ghost btn-sm" onclick="showList()"><i class="fas fa-arrow-left"></i> Geri</button>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title"><i class="fas fa-user text-blue" style="margin-right:8px"></i>Hesap Bilgileri</div>
+      <div class="field"><label>Kullanıcı Adı</label><input class="input" id="cu-un" placeholder="kullanici_adi"></div>
+      <div class="field"><label>E-posta</label><input class="input" id="cu-em" type="email" placeholder="ornek@mail.com"></div>
+      <div class="form-row">
+        <div class="field"><label>Parola</label><input class="input" id="cu-pw" type="password" placeholder="••••••••"></div>
+        <div class="field"><label>Parola (Onayla)</label><input class="input" id="cu-pw2" type="password" placeholder="••••••••"></div>
+      </div>
+      <div class="field"><label>Kredi</label><input class="input" id="cu-cr" type="number" value="0" step="0.01" min="0"></div>
+      <label class="flex-center gap-8 mt-8 fs-13" style="cursor:pointer">
+        <input type="checkbox" id="cu-adm" style="accent-color:var(--blue)"> <span>Admin yetkisi ver</span>
+      </label>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="createUser()"><i class="fas fa-plus"></i> Oluştur</button>
+    </div>
+  </div>
+
+  <!-- ROLES -->
+  <div id="view-roles" style="display:none">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Roller</h1>
+      <button class="btn btn-ghost btn-sm" onclick="showList()"><i class="fas fa-arrow-left"></i> Geri</button>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title"><i class="fas fa-shield-alt text-blue" style="margin-right:8px"></i>Rol Oluştur</div>
+      <div class="form-row">
+        <div class="field"><label>Ad</label><input class="input" placeholder="ör. Moderatör"></div>
+        <div class="field"><label>Öncelik</label><input class="input" type="number" value="0"></div>
+      </div>
+      <div class="field"><label>Kullanıcı Adı CSS</label><textarea class="input" rows="3" placeholder="color:#e03535;font-weight:bold;"></textarea></div>
+      <div class="field"><label>Rozet CSS</label><textarea class="input" rows="3" placeholder="background:#e03535;color:#fff;"></textarea></div>
+      <div class="toggle-wrap mt-16"><div class="toggle on" onclick="this.classList.toggle('on')"></div><span class="toggle-label">Yetkili rolü mü?</span></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="toast('Rol oluşturuldu!','success')"><i class="fas fa-save"></i> Oluştur</button>
+    </div>
+  </div>
+
+  <!-- STAFF -->
+  <div id="view-staff" style="display:none">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Yetkililer</h1>
+      <button class="btn btn-ghost btn-sm" onclick="showList()"><i class="fas fa-arrow-left"></i> Geri</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Kullanıcı</th><th>E-posta</th><th>Rol</th><th>Kredi</th><th>Tarih</th><th></th></tr></thead>
+        <tbody id="staff-tbody"><tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BANNED -->
+  <div id="view-banned" style="display:none">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Engellenen Kullanıcılar</h1>
+      <button class="btn btn-ghost btn-sm" onclick="showList()"><i class="fas fa-arrow-left"></i> Geri</button>
+    </div>
+    <div class="empty-state"><div class="empty-icon" style="font-size:56px;opacity:0.4">🚫</div><h3>Engellenen kullanıcı yok</h3></div>
+  </div>
+
+  <!-- SEND CREDIT -->
+  <div id="view-credit" style="display:none">
+    <div class="dash-ph">
+      <h1 class="dash-page-title" style="margin-bottom:0">Kredi Gönder</h1>
+      <button class="btn btn-ghost btn-sm" onclick="showList()"><i class="fas fa-arrow-left"></i> Geri</button>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title"><i class="fas fa-paper-plane text-blue" style="margin-right:8px"></i>Transfer Detayları</div>
+      <div class="field"><label>Kullanıcı Ara</label><input class="input" id="sc-user" placeholder="Kullanıcı adını girin..."></div>
+      <div class="field"><label>Miktar</label><input class="input" id="sc-amount" type="number" min="0.01" step="0.01" placeholder="0.00"></div>
+      <div class="toggle-wrap mt-16 mb-24">
+        <div class="toggle on" id="sc-toggle" onclick="this.classList.toggle('on')"></div>
+        <span class="toggle-label">Bu bir kazanç mı? <span class="text-muted fs-12">(kapalıysa düşülür)</span></span>
+      </div>
+      <button class="btn btn-primary" onclick="doSendCredit()"><i class="fas fa-paper-plane"></i> Gönder</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// View switching
+const views = ['users','create','roles','staff','banned','credit'];
+function showView(name) {
+  views.forEach(v => { const el = document.getElementById('view-'+v); if(el) el.style.display='none'; });
+  const el = document.getElementById('view-'+name);
+  if(el) el.style.display='block';
+  // update subnav active
+  document.querySelectorAll('.dash-subnav-item').forEach(i=>i.classList.remove('active'));
+}
+function showList() { showView('users'); loadUsers(); }
+function showCreate() { showView('create'); }
+function showPage(p) { showView(p); if(p==='staff') loadStaff(); }
+
+// Load users
+async function loadUsers() {
+  const tbody = document.getElementById('users-tbody');
+  const users = await api.get('/api/admin/users');
+  tbody.innerHTML = users.map(u => `<tr>
+    <td class="text-muted">#${u.id}</td>
+    <td><div class="user-cell"><img src="https://mc-heads.net/avatar/${u.username}/32" class="user-avatar" onerror="this.src='https://mc-heads.net/avatar/Steve/32'"><div><div class="username">${u.username}</div><div class="usertag">@${u.username}</div></div></div></td>
+    <td class="text-muted fs-13">${u.email}</td>
+    <td>${u.is_admin ? '<span class="badge-admin">Admin</span>' : '<span class="badge badge-white">Üye</span>'}</td>
+    <td class="fw-700 text-green">${fmt(u.credit)} Kredi</td>
+    <td class="text-muted fs-13">${timeAgo(u.created_at)}</td>
+    <td style="display:flex;gap:4px">
+      <button class="btn btn-red btn-icon btn-sm" onclick="deleteUser(${u.id},'${u.username}')"><i class="fas fa-trash"></i></button>
+    </td>
+  </tr>`).join('');
+  filterTable('user-search','users-tbody');
+}
+
+async function deleteUser(id, username) {
+  if(!confirm(`"${username}" silinsin mi?`)) return;
+  const res = await api.delete('/api/admin/users/'+id);
+  if(res.success) { toast('Kullanıcı silindi','success'); loadUsers(); }
+  else toast(res.error,'error');
+}
+
+async function createUser() {
+  const un=document.getElementById('cu-un').value.trim();
+  const em=document.getElementById('cu-em').value.trim();
+  const pw=document.getElementById('cu-pw').value;
+  const pw2=document.getElementById('cu-pw2').value;
+  const cr=parseFloat(document.getElementById('cu-cr').value)||0;
+  const adm=document.getElementById('cu-adm').checked?1:0;
+  if(!un||!em||!pw){toast('Tüm alanları doldurun','error');return;}
+  if(pw!==pw2){toast('Şifreler eşleşmiyor','error');return;}
+  const res=await api.post('/api/admin/users',{username:un,email:em,password:pw,credit:cr,is_admin:adm});
+  if(res.success){toast('Kullanıcı oluşturuldu!','success');showList();}
+  else toast(res.error,'error');
+}
+
+async function loadStaff() {
+  const tbody = document.getElementById('staff-tbody');
+  const users = await api.get('/api/admin/users');
+  const staff = users.filter(u=>u.is_admin);
+  tbody.innerHTML = staff.length===0
+    ? '<tr><td colspan="7" class="text-muted" style="padding:24px;text-align:center">Yetkili bulunamadı</td></tr>'
+    : staff.map(u=>`<tr>
+        <td class="text-muted">#${u.id}</td>
+        <td><div class="user-cell"><img src="https://mc-heads.net/avatar/${u.username}/32" class="user-avatar"><div><div class="username">${u.username}</div><div class="usertag">@${u.username}</div></div></div></td>
+        <td class="text-muted fs-13">${u.email}</td>
+        <td><span class="badge-admin">Admin</span></td>
+        <td class="fw-700 text-green">${fmt(u.credit)} Kredi</td>
+        <td class="text-muted fs-13">${timeAgo(u.created_at)}</td>
+        <td><button class="btn btn-blue btn-icon btn-sm"><i class="fas fa-eye"></i></button></td>
+      </tr>`).join('');
+}
+
+async function doSendCredit() {
+  const username=document.getElementById('sc-user').value.trim();
+  const amount=parseFloat(document.getElementById('sc-amount').value);
+  const is_earning=document.getElementById('sc-toggle').classList.contains('on');
+  if(!username||!amount){toast('Tüm alanları doldurun','error');return;}
+  const res=await api.post('/api/admin/send-credit',{username,amount,is_earning});
+  if(res.success) toast(res.message,'success');
+  else toast(res.error,'error');
+}
+
+loadUsers();
+</script>
+{% endblock %}

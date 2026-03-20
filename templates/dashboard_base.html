@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Yönetim Paneli{% endblock %} — ElementWars</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div id="ew-loading">
+  <div class="loading-logo">EW</div>
+  <div class="loading-text">ElementWars Yükleniyor</div>
+  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+</div>
+<div id="toast-container"></div>
+
+<div class="dash-layout">
+
+  <!-- ── Icon Sidebar ── -->
+  <aside class="dash-sidebar">
+    <div class="dash-brand" onclick="location.href='/dashboard'" style="cursor:pointer">EW</div>
+    <nav class="dash-icons">
+      <a class="dash-icon {% block icon_overview %}{% endblock %}" href="/dashboard" title="Genel Bakış"><i class="fas fa-home"></i></a>
+      <a class="dash-icon {% block icon_users %}{% endblock %}"    href="/dashboard/users"   title="Kullanıcılar"><i class="fas fa-users"></i></a>
+      <a class="dash-icon {% block icon_store %}{% endblock %}"    href="/dashboard/store"   title="Mağaza"><i class="fas fa-store"></i></a>
+      <a class="dash-icon {% block icon_support %}{% endblock %}"  href="/dashboard/support" title="Destek"><i class="fas fa-headset"></i></a>
+      <a class="dash-icon {% block icon_apps %}{% endblock %}"     href="/dashboard/apps"    title="Başvurular"><i class="fas fa-file-alt"></i></a>
+    </nav>
+    <div class="dash-icon-bottom">
+      <a class="dash-icon" href="/" title="Siteye Dön"><i class="fas fa-external-link-alt"></i></a>
+      <div class="dash-icon" onclick="doLogout()" title="Çıkış"><i class="fas fa-sign-out-alt"></i></div>
+    </div>
+  </aside>
+
+  <!-- ── Content: subnav + main ── -->
+  <div class="dash-content-area subnav-open" id="dash-content-area">
+
+    <!-- Sub-nav -->
+    <aside class="dash-subnav" id="dash-subnav">
+      <div class="dash-subnav-header">
+        <span class="dash-subnav-title-heading">{% block subnav_title %}{% endblock %}</span>
+        <button class="dash-subnav-close" onclick="toggleSubnav()" title="Kapat">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      </div>
+      <div class="dash-subnav-inner">
+        {% block subnav %}{% endblock %}
+      </div>
+    </aside>
+
+    <!-- Main panel -->
+    <div class="dash-main">
+      <div class="inner-topbar">
+        <button class="dash-subnav-toggle" onclick="toggleSubnav()" title="Menüyü Aç/Kapat">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="breadcrumb">
+          <a href="/dashboard"><i class="fas fa-home"></i></a>
+          {% block breadcrumb %}{% endblock %}
+        </div>
+        <div class="inner-topbar-right">
+          <i class="fas fa-search topbar-icon"></i>
+          <i class="fas fa-bell topbar-icon"></i>
+          <span class="text-muted fs-13" id="dash-username">...</span>
+        </div>
+      </div>
+
+      <div class="dash-body" id="dash-body">
+        {% block dash_content %}{% endblock %}
+      </div>
+
+      <div class="admin-footer">
+        <div class="footer-lang"><span>🇹🇷</span> Türkçe</div>
+        <div class="footer-brand">
+          <span style="color:var(--accent);font-weight:800">Element</span><span style="color:var(--blue);font-weight:800">Wars</span>
+          <span class="text-dim">v1.0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+<script>
+// Subnav toggle
+let subnavOpen = true;
+function toggleSubnav() {
+  subnavOpen = !subnavOpen;
+  document.getElementById('dash-content-area').classList.toggle('subnav-open', subnavOpen);
+}
+
+// Auth check
+async function dashCheck() {
+  const me = await api.get('/api/auth/me');
+  if (!me.logged_in || !me.is_admin) {
+    window.location.href = '/login';
+    return;
+  }
+  document.getElementById('dash-username').textContent = me.username;
+  hideLoader();
+}
+
+async function doLogout() {
+  await api.post('/api/auth/logout', {});
+  window.location.href = '/';
+}
+
+dashCheck();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
